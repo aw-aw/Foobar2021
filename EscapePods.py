@@ -127,20 +127,28 @@ def findPaths(g, starts, ends):
 def solution(starts, ends, e_map):
     g = Graph()
     throughput = 0
+    # this populates the empty graph with the vertices and edges from the input
     createGraph(g, e_map)
+    # this find all possible paths from each start to each end
     all_paths = findPaths(g, starts, ends)
     while len(all_paths) > 0:
+        # sort the paths by the path with the highest flow
         all_paths.sort(key=lambda x: x[1], reverse=True)
         curr_path, weight = all_paths[0]
+        # add that flow to our total flow
         throughput += weight
         for i in range(len(curr_path)-1):
             vtx_id = curr_path[i]
             vtx = g.getVertex(vtx_id)
             nbr = g.getVertex(curr_path[i+1])
             new_weight = max(0, vtx.getWeight(nbr.getID()) - weight)
+            # for the highest flow path, subtract the lowest flow hallway
+            # from each hallway
             vtx.setWeight(nbr.getID(), new_weight)
+            # remove any hallways with 0 flow
             if new_weight == 0:
                 g.removeEdge(vtx_id, nbr.getID(), True)
+        # recalculate the paths
         all_paths = findPaths(g, starts, ends)
     return throughput
 
